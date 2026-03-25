@@ -23,7 +23,7 @@ const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
-scene.background = new THREE.Color(0x202020);
+scene.background = new THREE.Color(0x000000);
 const light = new THREE.DirectionalLight(0xffffff, 1);
 light.position.set(1, 1, 1).normalize();
 scene.add(light);
