@@ -1,0 +1,98 @@
+<body>
+<div id = "controls">
+    <button id="select frames">Select Frames</button>
+    <button id="play animation">Play Animation</button>
+</div>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/"
+  }
+}
+</script>
+<script type = "module">
+
+import * as THREE from "three";
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 100;
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+scene.background = new THREE.Color(0x202020);
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(1, 1, 1).normalize();
+scene.add(light);
+
+frames = [];
+
+
+let loader = new GLTFLoader();
+
+const selectFramesButton = document.getElementById("select frames");
+selectFramesButton.addEventListener("click", () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".gltf,.glb";
+    fileInput.multiple = true;
+    fileInput.addEventListener("change", async (event) => {
+    const files = event.target.files;
+
+    for (const file of files) {
+        const url = URL.createObjectURL(file);
+
+        try {
+            const gltf = await loader.loadAsync(url);
+
+            // store the frame
+            frames.push(gltf.scene);
+
+        } catch (error) {
+            console.error("Error loading GLTF file:", error);
+        }
+    }
+});
+    fileInput.click();
+    
+    
+});
+let currentFrame = null;
+let currentFrameIndex = 0;
+let animationInterval = null;
+
+const playAnimationButton = document.getElementById("play animation");
+playAnimationButton.addEventListener("click", () => {
+
+    if (animationInterval) {
+        clearInterval(animationInterval);
+    }
+
+    animationInterval = setInterval(() => {
+
+        if (frames.length === 0) return;
+
+        if (currentFrame) {
+            scene.remove(currentFrame);
+        }
+
+        currentFrame = frames[currentFrameIndex].clone(true);
+        scene.add(currentFrame);
+
+        currentFrameIndex = (currentFrameIndex + 1) % frames.length;
+
+    }, 100); 
+});
+
+
+function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+}
+animate();
+
+</script>
+</body>
